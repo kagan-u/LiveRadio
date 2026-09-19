@@ -13,6 +13,7 @@
         <genre>radio</genre>
         <bitrate>192</bitrate>
         <type>audio/mpeg</type>
+        <subtype>mp3</subtype>
     </mount>
 
     <fileserve>1</fileserve>
@@ -34,5 +35,13 @@
 
     <security>
         <chroot>0</chroot>
+        <changeowner>
+            <user>icecast2</user>
+            <group>icecast</group>
+        </changeowner>
+        <source-password>hackme</source-password>
+        <relay-password>hackme</relay-password>
+        <admin-user>admin</admin-user>
+        <admin-password>hackme</admin-password>
     </security>
 </icecast>

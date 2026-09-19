@@ -4,6 +4,7 @@ import { verifyToken, getUserById } from './auth';
 import { getActiveBroadcast } from './broadcast';
 import { sendMessage, isUserBanned, deleteMessage, banUser } from './chat';
 import { query } from './db';
+import { startAudioIngest, writeAudioChunk, stopAudioIngest } from './audio-ingest';
 
 let io: Server;
 const listenerCounts = new Map<string, Set<string>>();
@@ -128,6 +129,30 @@ export function initWebSocket(httpServer: HttpServer): Server {
         album: data.album,
         startedAt: new Date().toISOString(),
       });
+    });
+
+    socket.on('start_audio_stream', (data: { broadcastId: string }) => {
+      if (!user || !['broadcaster', 'admin'].includes(user.role)) {
+        socket.emit('error', { message: 'Not authorized to stream audio' });
+        return;
+      }
+      const result = startAudioIngest(data.broadcastId);
+      socket.emit('audio_stream_status', result);
+    });
+
+    socket.on('audio_chunk', (data: { broadcastId: string; chunk: string }) => {
+      if (!user || !['broadcaster', 'admin'].includes(user.role)) return;
+      try {
+        const buffer = Buffer.from(data.chunk, 'base64');
+        writeAudioChunk(data.broadcastId, buffer);
+      } catch (err) {
+        console.error(`[AudioChunk] Failed for broadcast ${data.broadcastId}`);
+      }
+    });
+
+    socket.on('stop_audio_stream', (data: { broadcastId: string }) => {
+      if (!user || !['broadcaster', 'admin'].includes(user.role)) return;
+      stopAudioIngest(data.broadcastId);
     });
 
     socket.on('disconnect', () => {

@@ -19,7 +19,7 @@ export default function ListenPage() {
   const [showChat, setShowChat] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { connected, joinBroadcast, leaveBroadcast, sendChat, socket } = useSocket();
-  const STREAM_URL = process.env.NEXT_PUBLIC_STREAM_URL || 'http://localhost:8000/live';
+  const STREAM_URL = process.env.NEXT_PUBLIC_STREAM_URL || 'http://localhost:4000/api/audio/stream';
 
   useEffect(() => {
     api('/api/broadcasts/active').then((r) => {

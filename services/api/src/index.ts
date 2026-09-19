@@ -9,6 +9,7 @@ import authRoutes from './routes/auth';
 import broadcastRoutes from './routes/broadcast';
 import chatRoutes from './routes/chat';
 import adminRoutes from './routes/admin';
+import audioRoutes from './routes/audio';
 import { optionalAuth } from './middleware/auth';
 
 const app = express();
@@ -51,6 +52,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/broadcasts', optionalAuth, broadcastRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/audio', audioRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
