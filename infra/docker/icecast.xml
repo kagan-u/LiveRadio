@@ -1,12 +1,4 @@
-<configuration>
-    <location>/admin</location>
-    <admin-user>admin</admin-user>
-    <admin-password>hackme</admin-password>
-
-    <authentication type="htpasswd">
-        <option name="filename" value="/etc/icecast2/users.pool"/>
-    </authentication>
-
+<icecast>
     <hostname>localhost</hostname>
 
     <listen-socket>
@@ -15,16 +7,12 @@
 
     <mount>
         <mount-name>/live</mount-name>
-        <fallback-mount>/silent.mp3</fallback-mount>
-        <fallback-override>1</fallback-override>
-        <fallback-when-full>1</fallback-when-full>
         <stream-name>RadioLive</stream-name>
         <stream-description>Live Internet Radio</stream-description>
         <stream-url>http://localhost:3000</stream-url>
         <genre>radio</genre>
         <bitrate>192</bitrate>
-        <type>application/ogg</type>
-        <subtype>vorbis</subtype>
+        <type>audio/mpeg</type>
     </mount>
 
     <fileserve>1</fileserve>
@@ -47,4 +35,4 @@
     <security>
         <chroot>0</chroot>
     </security>
-</configuration>
+</icecast>
