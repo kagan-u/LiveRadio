@@ -172,9 +172,10 @@ export default function BroadcastPage() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="flex items-end gap-0.5">
-              {[0, 0.1, 0.2, 0.3, 0.4].map((d) => (
-                <div key={d} className={`freq-bar eq-bar ${status === 'live' ? '' : 'opacity-20'}`}
-                  style={{ '--eq-height': `${8 + Math.random() * 16}px`, '--eq-delay': `${d}s`, height: '3px' } as any} />
+              {[12, 18, 8, 15, 10].map((h, i) => (
+                <div key={i} className={`freq-bar eq-bar ${status === 'live' ? '' : 'opacity-20'}`}
+                  suppressHydrationWarning
+                  style={{ '--eq-height': `${h}px`, '--eq-delay': `${i * 0.1}s`, height: '3px' } as any} />
               ))}
             </div>
             <div>

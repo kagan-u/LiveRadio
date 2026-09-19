@@ -5,11 +5,14 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import Navbar from '@/components/Navbar';
 
-function EqBar({ delay }: { delay: number }) {
-  const h = 8 + Math.random() * 20;
+const EQ_HEIGHTS = [14, 22, 10, 18, 26, 12, 20];
+
+function EqBar({ delay, index }: { delay: number; index: number }) {
+  const h = EQ_HEIGHTS[index % EQ_HEIGHTS.length];
   return (
     <div
       className="freq-bar eq-bar"
+      suppressHydrationWarning
       style={{ '--eq-height': `${h}px`, '--eq-delay': `${delay}s`, height: '4px' } as any}
     />
   );
@@ -41,8 +44,8 @@ export default function LandingPage() {
         <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
           {/* Radio Icon with EQ */}
           <div className="flex items-end justify-center gap-1 mb-8">
-            {[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6].map((d) => (
-              <EqBar key={d} delay={d} />
+            {[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6].map((d, i) => (
+              <EqBar key={d} delay={d} index={i} />
             ))}
           </div>
 
