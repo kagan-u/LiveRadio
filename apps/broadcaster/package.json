@@ -1,0 +1,35 @@
+{
+  "name": "@radiolive/broadcaster",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Desktop broadcaster for RadioLive - captures system audio and streams to Icecast",
+  "main": "dist/main/index.js",
+  "scripts": {
+    "dev": "electron .",
+    "build": "tsc && electron-builder",
+    "start": "electron dist/main/index.js"
+  },
+  "dependencies": {
+    "@radiolive/shared": "workspace:*",
+    "electron-store": "^8.2.0",
+    "socket.io-client": "^4.8.0"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.0",
+    "typescript": "^5.7.0"
+  },
+  "build": {
+    "appId": "dev.radiolive.broadcaster",
+    "productName": "RadioLive Broadcaster",
+    "mac": {
+      "category": "public.app-category.music"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}

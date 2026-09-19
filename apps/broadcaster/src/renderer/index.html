@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'">
+  <title>RadioLive Broadcaster</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0a0a;
+      color: #e0e0e0;
+      -webkit-app-region: drag;
+      user-select: none;
+      overflow: hidden;
+      height: 100vh;
+    }
+    .drag-region {
+      height: 32px;
+      -webkit-app-region: drag;
+    }
+    .app {
+      padding: 0 24px 24px;
+      -webkit-app-region: no-drag;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: #ff4444;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    .logo-text {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .status-card {
+      background: #111;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      background: #ff4444;
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .live-dot.active {
+      box-shadow: 0 0 8px rgba(255,68,68,0.6);
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .stat {
+      background: #1a1a1a;
+      border-radius: 8px;
+      padding: 10px;
+    }
+    .stat-label {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #666;
+      margin-bottom: 4px;
+    }
+    .stat-value {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .stat-value small {
+      font-size: 10px;
+      font-weight: 400;
+      color: #666;
+    }
+    label {
+      display: block;
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px 12px;
+      background: #1a1a1a;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+      margin-bottom: 12px;
+      -webkit-app-region: no-drag;
+    }
+    input:focus, select:focus {
+      border-color: #ff4444;
+    }
+    select option {
+      background: #1a1a1a;
+    }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      -webkit-app-region: no-drag;
+    }
+    .btn-primary {
+      background: #ff4444;
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: #ff6666;
+    }
+    .btn-primary:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    .btn-secondary {
+      background: #222;
+      color: #888;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .btn-secondary:hover {
+      background: #2a2a2a;
+      color: #fff;
+    }
+    .error {
+      background: rgba(255,68,68,0.1);
+      border: 1px solid rgba(255,68,68,0.2);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 11px;
+      color: #ff6666;
+      margin-bottom: 12px;
+    }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="drag-region"></div>
+  <div class="app">
+    <div class="logo">
+      <div class="logo-icon">📡</div>
+      <span class="logo-text">RadioLive Broadcaster</span>
+    </div>
+
+    <div class="status-card">
+      <div class="live-badge">
+        <div class="live-dot" id="liveDot"></div>
+        <span id="statusText">OFFLINE</span>
+      </div>
+      <div class="stats-grid">
+        <div class="stat">
+          <div class="stat-label">Listeners</div>
+          <div class="stat-value" id="listenerCount">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Bitrate</div>
+          <div class="stat-value" id="bitrate">192 <small>kbps</small></div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Time</div>
+          <div class="stat-value" id="uptime">00:00:00</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Status</div>
+          <div class="stat-value" id="connectionStatus" style="font-size:11px;color:#666">Idle</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="errorBox" class="error hidden"></div>
+
+    <div id="configForm">
+      <label>Server URL</label>
+      <input type="text" id="serverUrl" value="http://localhost:8000" placeholder="http://localhost:8000">
+
+      <label>Stream Key</label>
+      <input type="text" id="streamKey" placeholder="Your broadcast stream key">
+
+      <label>Mount Point</label>
+      <input type="text" id="mountPoint" value="/live" placeholder="/live">
+
+      <label>Audio Device</label>
+      <select id="audioDevice">
+        <option value="">Loading devices...</option>
+      </select>
+
+      <label>Bitrate (kbps)</label>
+      <select id="bitrateSelect">
+        <option value="128">128 kbps</option>
+        <option value="192" selected>192 kbps</option>
+        <option value="256">256 kbps</option>
+        <option value="320">320 kbps</option>
+      </select>
+    </div>
+
+    <button class="btn btn-primary" id="startBtn" onclick="startStream()">START BROADCAST</button>
+    <button class="btn btn-secondary hidden" id="stopBtn" onclick="stopStream()">STOP BROADCAST</button>
+  </div>
+
+  <script>
+    const { broadcaster } = window;
+
+    let isStreaming = false;
+    let startTime = null;
+    let uptimeInterval = null;
+
+    // Load audio devices
+    async function loadDevices() {
+      const devices = await broadcaster.getAudioDevices();
+      const select = document.getElementById('audioDevice');
+      select.innerHTML = devices.map(d =>
+        `<option value="${d.id}">${d.name} (${d.type})</option>`
+      ).join('');
+    }
+
+    loadDevices();
+
+    // Stream controls
+    async function startStream() {
+      const config = {
+        serverUrl: document.getElementById('serverUrl').value,
+        streamKey: document.getElementById('streamKey').value,
+        mountPoint: document.getElementById('mountPoint').value,
+        bitrate: parseInt(document.getElementById('bitrateSelect').value),
+        audioDevice: document.getElementById('audioDevice').value,
+      };
+
+      if (!config.streamKey) {
+        showError('Please enter your stream key');
+        return;
+      }
+
+      hideError();
+      const result = await broadcaster.startStream(config);
+
+      if (result.success) {
+        isStreaming = true;
+        startTime = Date.now();
+        updateUI();
+        startUptimeCounter();
+      } else {
+        showError(result.error);
+      }
+    }
+
+    async function stopStream() {
+      await broadcaster.stopStream();
+      isStreaming = false;
+      startTime = null;
+      clearInterval(uptimeInterval);
+      updateUI();
+    }
+
+    function updateUI() {
+      const liveDot = document.getElementById('liveDot');
+      const statusText = document.getElementById('statusText');
+      const startBtn = document.getElementById('startBtn');
+      const stopBtn = document.getElementById('stopBtn');
+      const configForm = document.getElementById('configForm');
+
+      if (isStreaming) {
+        liveDot.classList.add('active');
+        statusText.textContent = 'BROADCASTING';
+        statusText.style.color = '#ff4444';
+        startBtn.classList.add('hidden');
+        stopBtn.classList.remove('hidden');
+        configForm.style.opacity = '0.3';
+        configForm.style.pointerEvents = 'none';
+        document.getElementById('connectionStatus').textContent = 'Connected';
+        document.getElementById('connectionStatus').style.color = '#4ade80';
+      } else {
+        liveDot.classList.remove('active');
+        statusText.textContent = 'OFFLINE';
+        statusText.style.color = '#666';
+        startBtn.classList.remove('hidden');
+        stopBtn.classList.add('hidden');
+        configForm.style.opacity = '1';
+        configForm.style.pointerEvents = 'auto';
+        document.getElementById('listenerCount').textContent = '0';
+        document.getElementById('uptime').textContent = '00:00:00';
+        document.getElementById('connectionStatus').textContent = 'Idle';
+        document.getElementById('connectionStatus').style.color = '#666';
+      }
+    }
+
+    function startUptimeCounter() {
+      uptimeInterval = setInterval(() => {
+        if (!startTime) return;
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const h = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+        const m = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+        const s = String(elapsed % 60).padStart(2, '0');
+        document.getElementById('uptime').textContent = `${h}:${m}:${s}`;
+      }, 1000);
+    }
+
+    function showError(msg) {
+      const box = document.getElementById('errorBox');
+      box.textContent = msg;
+      box.classList.remove('hidden');
+    }
+
+    function hideError() {
+      document.getElementById('errorBox').classList.add('hidden');
+    }
+
+    // Event listeners
+    broadcaster.onStreamProgress((data) => {
+      if (data.bitrate) {
+        document.getElementById('bitrate').innerHTML = `${Math.round(data.bitrate)} <small>kbps</small>`;
+      }
+    });
+
+    broadcaster.onStreamError((msg) => {
+      showError(msg);
+      isStreaming = false;
+      updateUI();
+    });
+
+    broadcaster.onStreamStopped((data) => {
+      isStreaming = false;
+      startTime = null;
+      clearInterval(uptimeInterval);
+      updateUI();
+      if (data.code !== 0) {
+        showError(`Stream ended with error (code: ${data.code})`);
+      }
+    });
+  </script>
+</body>
+</html>

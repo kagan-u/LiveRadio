@@ -1,0 +1,96 @@
+services:
+  database:
+    image: postgres:16-alpine
+    container_name: radiolive-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-radio}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-radio_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-radiolive}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-radio}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: radiolive-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  icecast:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.icecast
+    container_name: radiolive-icecast
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      ICECAST_SOURCE_PASSWORD: ${ICECAST_SOURCE_PASSWORD:-hackme}
+      ICECAST_RELAY_PASSWORD: ${ICECAST_RELAY_PASSWORD:-hackme}
+      ICECAST_ADMIN_PASSWORD: ${ICECAST_ADMIN_PASSWORD:-hackme}
+      ICECAST_ADMIN_USERNAME: ${ICECAST_ADMIN_USERNAME:-admin}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8000/status.xsl || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  api:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.api
+    container_name: radiolive-api
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: postgresql://radio:radio_secret@database:5432/radiolive
+      REDIS_URL: redis://redis:6379
+      API_PORT: 4000
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      CORS_ORIGIN: http://localhost:3000
+      ICECAST_HOST: icecast
+      ICECAST_PORT: 8000
+      ICECAST_SOURCE_PASSWORD: ${ICECAST_SOURCE_PASSWORD:-hackme}
+      STREAM_MOUNT: /live
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      icecast:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.web
+    container_name: radiolive-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+      NEXT_PUBLIC_WS_URL: ws://localhost:4000
+      NEXT_PUBLIC_STREAM_URL: http://localhost:8000/live
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
+  redisdata:

@@ -1,0 +1,13 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY services/api/package.json ./package.json
+RUN npm install
+
+COPY services/api/ .
+COPY packages/shared/ ../packages/shared/
+
+RUN npx tsc || true
+
+CMD ["npx", "tsx", "src/index.ts"]

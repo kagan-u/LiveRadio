@@ -1,0 +1,18 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    icecast2 \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /var/log/icecast2 && \
+    chown -R icecast2:icecast2 /var/log/icecast2 && \
+    mkdir -p /var/run/icecast2 && \
+    chown -R icecast2:icecast2 /var/run/icecast2
+
+COPY infra/docker/icecast.xml /etc/icecast2/icecast.xml
+
+EXPOSE 8000
+
+CMD ["icecast2", "-c", "/etc/icecast2/icecast.xml", "-b"]

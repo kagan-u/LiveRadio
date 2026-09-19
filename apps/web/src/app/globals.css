@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #0a0a0a;
+  color: #e0e0e0;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #111111;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #444;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background: #ff4444;
+  border-radius: 50%;
+  animation: pulse-live 2s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(255, 68, 68, 0.6);
+}
+
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px rgba(255, 68, 68, 0.6); }
+  50% { opacity: 0.5; box-shadow: 0 0 16px rgba(255, 68, 68, 0.8); }
+}
+
+.glass {
+  background: rgba(17, 17, 17, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glow-red {
+  box-shadow: 0 0 20px rgba(255, 68, 68, 0.15);
+}
+
+input, textarea {
+  outline: none;
+}
+
+input:focus, textarea:focus {
+  border-color: #ff4444;
+}
