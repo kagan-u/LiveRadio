@@ -1,0 +1,33 @@
+FROM node:20-alpine
+
+RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN apk add --no-cache ffmpeg icecast2
+
+WORKDIR /app
+
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY packages/shared/package.json ./packages/shared/
+COPY services/api/package.json ./services/api/
+COPY apps/web/package.json ./apps/web/
+
+RUN pnpm install --frozen-lockfile
+
+COPY packages/shared/ ./packages/shared/
+COPY services/api/ ./services/api/
+COPY apps/web/ ./apps/web/
+COPY infra/docker/icecast.xml ./infra/docker/icecast.xml
+
+WORKDIR /app/services/api
+RUN npx tsc || true
+
+WORKDIR /app/apps/web
+RUN npm run build
+
+WORKDIR /app
+
+COPY scripts/start-railway.sh ./start-railway.sh
+RUN chmod +x ./start-railway.sh
+
+EXPOSE 3000 4000 8000
+
+CMD ["./start-railway.sh"]

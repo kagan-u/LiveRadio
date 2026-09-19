@@ -4,6 +4,17 @@ Open-source internet radio platform. One live stream. Everyone hears the same th
 
 ## Quick Start
 
+### Windows
+
+Double-click `setup.bat` to install everything, then `start.bat` to launch:
+
+```
+setup.bat     ← First time only (installs deps, sets up DB)
+start.bat     ← Start API + Web servers
+stop.bat      ← Stop everything
+test-stream.bat ← Test audio stream to Icecast
+```
+
 ### Docker (Recommended)
 
 ```bash
@@ -12,6 +23,20 @@ docker compose up -d
 ```
 
 Visit `http://localhost:3000`
+
+### Railway (Cloud Deploy)
+
+See [docs/RAILWAY.md](docs/RAILWAY.md) for full guide.
+
+Quick deploy:
+
+1. Fork this repo on GitHub
+2. Go to https://railway.app/new
+3. Select "Deploy from GitHub repo"
+4. Set Dockerfile to `Dockerfile.railway`
+5. Add PostgreSQL + Redis databases
+6. Set environment variables
+7. Deploy
 
 ### Local Development
 
