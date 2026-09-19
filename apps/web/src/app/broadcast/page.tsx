@@ -58,15 +58,27 @@ export default function BroadcastPage() {
       socket.emit('start_audio_stream', { broadcastId: broadcast.id });
 
       const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: false,
+        video: {
+          displaySurface: 'browser',
+          logicalSurface: true,
+          cursor: 'never',
+        } as any,
         audio: {
+          suppressLocalAudioPlayback: false,
           echoCancellation: false,
           noiseSuppression: false,
           autoGainControl: false,
           sampleRate: 44100,
           channelCount: 2,
         } as any,
-      });
+        preferCurrentTab: false,
+        selfBrowserSurface: 'exclude',
+        systemAudio: 'include',
+        surfaceSwitching: 'include',
+      } as any);
+
+      // Video track'leri at, sadece ses lazım
+      stream.getVideoTracks().forEach(t => t.stop());
 
       const audioTracks = stream.getAudioTracks();
       if (audioTracks.length === 0) {
